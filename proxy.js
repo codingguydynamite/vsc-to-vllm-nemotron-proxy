@@ -17,6 +17,9 @@ const VLLM_MODEL =
     process.env.VLLM_MODEL ||
     'nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-NVFP4';
 
+// Logging
+const LOG_LEVEL = process.env.LOG_LEVEL || 'error';
+
 //
 // The only two model aliases we expose.
 //
@@ -42,7 +45,6 @@ const MODELS = {
 //
 
 function readJsonBody(req) {
-    console.log("Here")
     return new Promise((resolve, reject) => {
         let body = '';
 
@@ -101,7 +103,7 @@ function handleHealth(res) {
 //
 
 function handleModels(res) {
-    console.log('[request] /v1/models');
+    // [request] /v1/models
     const data = Object.entries(MODELS).map(([id, config]) => ({
         id,
         object: 'model',
@@ -123,10 +125,8 @@ function handleModels(res) {
 
 async function handleChatCompletions(req, res) {
     let body;
-
     try {
         body = await readJsonBody(req);
-        console.log('[request body]', body);
     } catch (error) {
         sendJson(res, 400, {
             error: {
@@ -197,11 +197,6 @@ async function handleChatCompletions(req, res) {
     //
     // The object above already replaces it.
     //
-
-    console.log(
-        `[request] ${requestedModel} -> ${VLLM_MODEL} ` +
-        `(thinking=${modelConfig.enable_thinking})`
-    );
 
     //
     // Forward request to vLLM.
